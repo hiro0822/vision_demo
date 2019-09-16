@@ -41,7 +41,7 @@
 <script>
 
 // Your GCP API_KEY
-const API_KEY = "AIzaSyCIesXZn8A0QvQNDnefQ__myzqmaHN1Nhk"
+const API_KEY = ""
 
 import axios from 'axios'
 import _ from 'lodash'
