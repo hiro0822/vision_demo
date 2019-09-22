@@ -19,9 +19,9 @@
 		<div class="mt-3">
 			<b-spinner variant="primary" type="grow" label="Spinning" v-if="loading"></b-spinner>
 			<b-button-group v-else-if="!loading && result">
-				<b-button variant="success" v-if="this.result.faceAnnotations" @click="moveTo('/face')">Face</b-button>
-				<b-button variant="success" v-if="this.result.labelAnnotations" @click="moveTo('/label')">Label</b-button>
-				<b-button variant="success" v-if="this.result.localizedObjectAnnotations" @click="moveTo('/object')">Object</b-button>
+				<b-button variant="success" v-if="this.result.faceAnnotations.length > 0" @click="moveTo('/face')">Face</b-button>
+				<b-button variant="success" v-if="this.result.labelAnnotations.length > 0" @click="moveTo('/label')">Label</b-button>
+				<b-button variant="success" v-if="this.result.localizedObjectAnnotations.length > 0" @click="moveTo('/object')">Object</b-button>
 			</b-button-group>
 		</div>
 		<router-view :result="result" :uploadedImage="uploadedImage"></router-view>
@@ -41,8 +41,8 @@
 <script>
 
 // Your GCP API_KEY
-const API_KEY = ""
-
+// const API_KEY = "AIzaSyBeRcrCNuhyf-hUe-ii4SGXRkMRHzC8WOI"
+// const baseURL = "api"
 import axios from 'axios'
 import _ from 'lodash'
 
@@ -113,25 +113,44 @@ export default {
 			const startIndex = img.indexOf(",")
 			this.request.requests[0].image.content = img.slice(startIndex + 1)
 
-			axios.post(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, this.request).then(response => {
+			const test = {img: img.slice(startIndex + 1)}
+			axios.post('/api/vision', test).then(response => {
 				this.loading = false
-				this.result = response.data.responses[0]
-
+				console.log(response.data[0])
+				this.result = response.data[0]
 				// 自動的に遷移させる
-				if(this.result.faceAnnotations){
+				if(this.result.faceAnnotations.length > 0){
 					this.moveTo('/face')
-				}else if (this.result.labelAnnotations){
+				}else if (this.result.labelAnnotations.length > 0){
 					this.moveTo('/label')
-				}else if(this.result.localizedObjectAnnotations){
+				}else if(this.result.localizedObjectAnnotations.length > 0){
 					this.moveTo('/object')
 				}else{
 					this.errObj = new Error("エラーが発生しました")
 				}
-
 			}).catch(error => {
         this.errObj = error
-				console.log(error);
 			})
+
+			// axios.post(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, this.request).then(response => {
+			// 	this.loading = false
+			// 	this.result = response.data.responses[0]
+
+			// 	// 自動的に遷移させる
+			// 	if(this.result.faceAnnotations){
+			// 		this.moveTo('/face')
+			// 	}else if (this.result.labelAnnotations){
+			// 		this.moveTo('/label')
+			// 	}else if(this.result.localizedObjectAnnotations){
+			// 		this.moveTo('/object')
+			// 	}else{
+			// 		this.errObj = new Error("エラーが発生しました")
+			// 	}
+
+			// }).catch(error => {
+      //   this.errObj = error
+			// 	console.log(error);
+			// })
 		},
 		moveTo(to){
 			if (this.$route.path === to) return
