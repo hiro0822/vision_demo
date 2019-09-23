@@ -11,39 +11,35 @@ router.post('/api/vision', async (req, res) => {
     features: [
       {
         "type": "FACE_DETECTION",
-        "maxResults": 50
+        "maxResults": 10
       },
       {
         "type": "LABEL_DETECTION",
-        "maxResults": 50
+        "maxResults": 10
       },
       {
         "type": "OBJECT_LOCALIZATION",
-        "maxResults": 50
+        "maxResults": 10
       },
       {
         "type": "LANDMARK_DETECTION",
-        "maxResults": 50
+        "maxResults": 10
       },
       {
         "type": "LOGO_DETECTION",
-        "maxResults": 50
+        "maxResults": 10
       },
       {
         "type": "TEXT_DETECTION",
-        "maxResults": 50
-      },
-      {
-        "type": "DOCUMENT_TEXT_DETECTION",
-        "maxResults": 50
+        "maxResults": 10
       },
       {
         "type": "WEB_DETECTION",
-        "maxResults": 50
+        "maxResults": 10
       },
       {
         "type": "SAFE_SEARCH_DETECTION",
-        "maxResults": 50
+        "maxResults": 10
       },
     ]
   };

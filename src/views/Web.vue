@@ -4,13 +4,13 @@
 		<!-- 画像部分もcomponentで外出ししたい -->
 		<div class="image-box mr-3">
 		<!-- <img class="img" v-if="uploadedImage" :src="uploadedImage" /> -->
-			<canvas id="canvasInLabel" class="img"></canvas>
+			<canvas id="canvasInWeb" class="img"></canvas>
 		</div>
-		<div class="labelAnnotations">
+		<div class="textAnnotations">
 			<div class="mt-3">
-				<div v-for="(labelA, index) in this.results.labelAnnotations" :key="index">
-					<h5>{{labelA.description}} | {{Math.round(labelA.score * 1000) /10}}%</h5>
-					<b-progress :value="labelA.score * 100" :precision="2" height="5px" class="mb-3"></b-progress>
+				<div v-for="(fullMatchingImage, index) in this.results[resultKey].fullMatchingImages" :key="index">
+					<a v-bind:href="fullMatchingImage.url" target="_blank">{{fullMatchingImage.url}}</a>
+					<b-progress :value="0 * 100" :precision="2" height="5px" class="mb-3"></b-progress>
 				</div>
 			</div>
 		</div>
@@ -19,13 +19,13 @@
 
 <script>
 export default {
-	name: 'LabelAnnotations',
+	name: 'WebDetection',
 	props: ['results', 'uploadedImage', 'resultKey'],
 	methods: {
 		drawImageAndBorder(){
 			if (!this.results || !this.uploadedImage) return
 			// drawImageAndBorder自体ををmixinにして外に出したかったが、getElementByIdが上手くいかなかった。
-			const canvas = document.getElementById("canvasInLabel")
+			const canvas = document.getElementById("canvasInWeb")
 			let ctx = canvas.getContext('2d')
 
 			let image = new Image()
@@ -46,7 +46,7 @@ export default {
 </script>
 <style scoped>
 
-.labelAnnotations {
+.textAnnotations {
 	height: 300px;
 	width: 50%;
 	overflow: auto;
