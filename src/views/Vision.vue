@@ -71,33 +71,7 @@ export default {
 			results: null,
 			loading: false,
 			resultKeys: [],
-			isFaceExists: false,
-			isLabelExists: false,
-			isObjectExists: false,
 			errObj: '',
-			request: {
-			"requests":[
-				{
-					"image":{
-					"content": null
-					},
-					"features":[
-					{
-						"type":"FACE_DETECTION",
-						"maxResults": 50
-					},
-					{
-						"type": "LABEL_DETECTION",
-						"maxResults": 50
-					},
-					{
-						"maxResults": 50,
-						"type": "OBJECT_LOCALIZATION"
-					},
-					]
-				}
-			]
-			}
     }
   },
   computed:{
@@ -125,10 +99,8 @@ export default {
 			const img = _.cloneDeep(this.uploadedImage)
 			// base64の最初のdata:以下を削除
 			const startIndex = img.indexOf(",")
-			this.request.requests[0].image.content = img.slice(startIndex + 1)
-
-			const test = {img: img.slice(startIndex + 1)}
-			axios.post('/api/vision', test).then(response => {
+			const request = {img: img.slice(startIndex + 1)}
+			axios.post('/api/vision', request).then(response => {
 				this.loading = false
 				const results = response.data[0]
 				const resultKeys = []
@@ -142,44 +114,10 @@ export default {
 				});
 				this.results = results;
 				this.resultKeys = resultKeys;
-				// // 自動的に遷移させる
-				// if(this.results.faceAnnotations.length > 0){
-				// 	this.moveTo('/face')
-				// }else if (this.results.labelAnnotations.length > 0){
-				// 	this.moveTo('/label')
-				// }else if(this.results.localizedObjectAnnotations.length > 0){
-				// 	this.moveTo('/object')
-				// }else{
-				// 	this.errObj = new Error("エラーが発生しました")
-				// }
 			}).catch(error => {
         this.errObj = error
 			})
-
-			// axios.post(`https://vision.googleapis.com/v1/images:annotate?key=${API_KEY}`, this.request).then(response => {
-			// 	this.loading = false
-			// 	this.result = response.data.responses[0]
-
-			// 	// 自動的に遷移させる
-			// 	if(this.result.faceAnnotations){
-			// 		this.moveTo('/face')
-			// 	}else if (this.result.labelAnnotations){
-			// 		this.moveTo('/label')
-			// 	}else if(this.result.localizedObjectAnnotations){
-			// 		this.moveTo('/object')
-			// 	}else{
-			// 		this.errObj = new Error("エラーが発生しました")
-			// 	}
-
-			// }).catch(error => {
-      //   this.errObj = error
-			// 	console.log(error);
-			// })
 		},
-		// moveTo(to){
-		// 	if (this.$route.path === to) return
-		// 	this.$router.push(to)
-		// }
   },
 }
 </script>
