@@ -18,22 +18,16 @@
 		</div>
 		<div class="mt-3">
 			<b-spinner variant="primary" type="grow" label="Spinning" v-if="loading"></b-spinner>
-			<!-- <b-button-group v-else-if="!loading && results">
-				<b-button variant="success" v-if="this.results.faceAnnotations.length > 0" @click="moveTo('/face')">Face</b-button>
-				<b-button variant="success" v-if="this.results.labelAnnotations.length > 0" @click="moveTo('/label')">Label</b-button>
-				<b-button variant="success" v-if="this.results.localizedObjectAnnotations.length > 0" @click="moveTo('/object')">Object</b-button>
-			</b-button-group> -->
 		</div>
 		<b-card no-body v-if="!loading && results">
 			<b-tabs  pills card no-fade>
-				<b-tab v-for="resultKey in resultKeys" v-bind:key="resultKey" :title="resultKey">
+				<b-tab v-for="( resultKey, index ) in resultKeys" v-bind:key="index" :title="resultKey">
 					<b-card-text>
 						<div v-bind:is="resultKey" :results="results" :uploadedImage="uploadedImage" :resultKey="resultKey"><div>
 					</b-card-text>
 				</b-tab>
 			</b-tabs>
 		</b-card>
-		<!-- <router-view :results="results" :uploadedImage="uploadedImage"></router-view> -->
     <b-form-file
       v-if="this.results"
       style="width: 50%"
@@ -52,16 +46,25 @@
 // Your GCP API_KEY
 import axios from 'axios'
 import _ from 'lodash'
+import FaceAnnotations from './Face'
 import LabelAnnotations from './Label'
 import LocalizedObjectAnnotations from './Object'
-import FaceAnnotations from './Face'
+import SafeSearchAnnotation from './Safe'
+import TextAnnotations from './Text'
+import WebDetection from './Web'
+import LogoAnnotations from './Logo'
+import FullTextVue from './FullText.vue'
 
 export default {
 	name: 'Vision',
 	components: {
+		"faceAnnotations": FaceAnnotations,
 		"labelAnnotations": LabelAnnotations,
 		"localizedObjectAnnotations": LocalizedObjectAnnotations,
-		"faceAnnotations": FaceAnnotations,
+		"safeSearchAnnotation": SafeSearchAnnotation,
+		"textAnnotations": TextAnnotations,
+		"webDetection": WebDetection,
+		"logoAnnotations": LogoAnnotations,
 	},
 	data () {
 		return {
@@ -82,7 +85,8 @@ export default {
   methods:{
 		onFileChange(e){
 			this.results = null
-      this.uploadedImage = null
+			this.uploadedImage = null
+			this.resultKeys = []
 			let files = e.target.files || e.dataTransfer.files;
 			this.createImage(files[0]);
 		},
@@ -104,6 +108,9 @@ export default {
 				this.loading = false
 				const results = response.data[0]
 				const resultKeys = []
+				if("fullTextAnnotation" in results) {
+					delete results["fullTextAnnotation"]
+				}
 				Object.keys(results).forEach(function (key) {
 					if(results[key] == null || results[key].length == 0 ) {
 						delete results[key]
