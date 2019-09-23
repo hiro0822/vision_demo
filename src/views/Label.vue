@@ -1,6 +1,6 @@
 <template>
-	<div class="mt-3 mb-3" v-if="result">
-		<h5>Label</h5>
+	<div class="mt-3 mb-3" v-if="results">
+		<h5>{{resultKey}}</h5>
 		<!-- 画像部分もcomponentで外出ししたい -->
 		<div class="image-box mr-3">
 		<!-- <img class="img" v-if="uploadedImage" :src="uploadedImage" /> -->
@@ -8,7 +8,7 @@
 		</div>
 		<div class="labelAnnotations">
 			<div class="mt-3">
-				<div v-for="(labelA, index) in this.result.labelAnnotations" :key="index">
+				<div v-for="(labelA, index) in this.results.labelAnnotations" :key="index">
 					<h5>{{labelA.description}} | {{Math.round(labelA.score * 1000) /10}}%</h5>
 					<b-progress :value="labelA.score * 100" :precision="2" height="5px" class="mb-3"></b-progress>
 				</div>
@@ -20,10 +20,10 @@
 <script>
 export default {
 	name: 'FaceAnnotation',
-	props: ['result', 'uploadedImage'],
+	props: ['results', 'uploadedImage', 'resultKey'],
 	methods: {
 		drawImageAndBorder(){
-			if (!this.result || !this.uploadedImage) return
+			if (!this.results || !this.uploadedImage) return
 			// drawImageAndBorder自体ををmixinにして外に出したかったが、getElementByIdが上手くいかなかった。
 			const canvas = document.getElementById("canvasInLabel")
 			let ctx = canvas.getContext('2d')
@@ -42,9 +42,6 @@ export default {
 	mounted(){
 		this.drawImageAndBorder()
 	},
-	updated(){
-		this.drawImageAndBorder()
-	}
 }
 </script>
 <style scoped>

@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "start": "./node_modules/nodemon/bin/nodemon.js app.js"
+    "start": "./node_modules/nodemon/bin/nodemon.js app.js --mode=development"
   },
   "dependencies": {
     "@google-cloud/vision": "^1.4.0",

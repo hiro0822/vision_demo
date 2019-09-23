@@ -1,12 +1,12 @@
 <template>
-	<div class="mt-3 mb-3" v-if="result">
-		<h5>Object</h5>
+	<div class="mt-3 mb-3" v-if="results">
+		<h5>{{resultKey}}</h5>
 		<div class="image-box mr-3">
 			<canvas id="canvasInObject" class="img"></canvas>
 		</div>
 		<div class="localizedObjectAnnotations">
 			<div class="mt-3">
-				<div v-for="(objectA, index) in result.localizedObjectAnnotations" :key="index">
+				<div v-for="(objectA, index) in results.localizedObjectAnnotations" :key="index">
 					<h5>{{objectA.name}} | {{Math.round(objectA.score * 1000) / 10}}%</h5>
 					<b-progress :value="objectA.score * 100" :precision="2" height="5px" class="mb-3"></b-progress>
 				</div>
@@ -21,7 +21,7 @@ import Mixin from '@/mixins/mixin'
 
 export default {
 	name: 'FaceAnnotation',
-	props: ['result', 'uploadedImage'],
+	props: ['results', 'uploadedImage', 'resultKey'],
 	mixins: [ Mixin ],
 	data(){
 		return {
@@ -30,12 +30,12 @@ export default {
 	},
 	methods: {
 		drawImageAndBorder(){
-			if (!this.result || !this.uploadedImage) return
+			if (!this.results || !this.uploadedImage) return
 			// drawImageAndBorder自体ををmixinにして外に出したかったが、getElementByIdが上手くいかなかった。
 			const canvas = document.getElementById("canvasInObject")
 			let ctx = canvas.getContext('2d')
 
-			const data = this.result.localizedObjectAnnotations
+			const data = this.results.localizedObjectAnnotations
 
 			let image = new Image()
 			image.src = this.uploadedImage
@@ -80,9 +80,6 @@ export default {
 	mounted(){
 		this.drawImageAndBorder()
 	},
-	updated(){
-		this.drawImageAndBorder()
-	}
 }
 </script>
 <style scoped>

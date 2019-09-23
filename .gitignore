@@ -1,5 +1,7 @@
 *node_module/
 node_modules/
+*dist/
+dist/
 .vscode/
 .env
 config/

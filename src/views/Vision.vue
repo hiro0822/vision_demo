@@ -3,7 +3,7 @@
 		<h1>Vision API デモ</h1>
 		<b-alert show variant="danger" v-if="errObj">{{errorMessage}}</b-alert>
     <b-form-file style="width: 50%"
-      v-if="!this.result"
+      v-if="!this.results"
       v-model="file"
       :state="Boolean(file)"
       placeholder="Choose a file or drop it here"
@@ -14,19 +14,28 @@
 			<img class="img" v-if="uploadedImage" :src="uploadedImage" />
 		</div>
 		<div class="mt-3">
-			<b-button variant="primary" @click="analyze" v-if="uploadedImage && !result">分析</b-button>
+			<b-button variant="primary" @click="analyze" v-if="uploadedImage && !results">分析</b-button>
 		</div>
 		<div class="mt-3">
 			<b-spinner variant="primary" type="grow" label="Spinning" v-if="loading"></b-spinner>
-			<b-button-group v-else-if="!loading && result">
-				<b-button variant="success" v-if="this.result.faceAnnotations.length > 0" @click="moveTo('/face')">Face</b-button>
-				<b-button variant="success" v-if="this.result.labelAnnotations.length > 0" @click="moveTo('/label')">Label</b-button>
-				<b-button variant="success" v-if="this.result.localizedObjectAnnotations.length > 0" @click="moveTo('/object')">Object</b-button>
-			</b-button-group>
+			<!-- <b-button-group v-else-if="!loading && results">
+				<b-button variant="success" v-if="this.results.faceAnnotations.length > 0" @click="moveTo('/face')">Face</b-button>
+				<b-button variant="success" v-if="this.results.labelAnnotations.length > 0" @click="moveTo('/label')">Label</b-button>
+				<b-button variant="success" v-if="this.results.localizedObjectAnnotations.length > 0" @click="moveTo('/object')">Object</b-button>
+			</b-button-group> -->
 		</div>
-		<router-view :result="result" :uploadedImage="uploadedImage"></router-view>
+		<b-card no-body v-if="!loading && results">
+			<b-tabs  pills card no-fade>
+				<b-tab v-for="resultKey in resultKeys" v-bind:key="resultKey" :title="resultKey">
+					<b-card-text>
+						<div v-bind:is="resultKey" :results="results" :uploadedImage="uploadedImage" :resultKey="resultKey"><div>
+					</b-card-text>
+				</b-tab>
+			</b-tabs>
+		</b-card>
+		<!-- <router-view :results="results" :uploadedImage="uploadedImage"></router-view> -->
     <b-form-file
-      v-if="this.result"
+      v-if="this.results"
       style="width: 50%"
       :state="Boolean(file)"
       placeholder="New File"
@@ -41,20 +50,27 @@
 <script>
 
 // Your GCP API_KEY
-// const API_KEY = "AIzaSyBeRcrCNuhyf-hUe-ii4SGXRkMRHzC8WOI"
-// const baseURL = "api"
 import axios from 'axios'
 import _ from 'lodash'
+import LabelAnnotations from './Label'
+import LocalizedObjectAnnotations from './Object'
+import FaceAnnotations from './Face'
 
 export default {
 	name: 'Vision',
+	components: {
+		"labelAnnotations": LabelAnnotations,
+		"localizedObjectAnnotations": LocalizedObjectAnnotations,
+		"faceAnnotations": FaceAnnotations,
+	},
 	data () {
 		return {
       //  fileはbootstrap-vueのv-model用
       file: null,
 			uploadedImage: null,
-			result: null,
+			results: null,
 			loading: false,
+			resultKeys: [],
 			isFaceExists: false,
 			isLabelExists: false,
 			isObjectExists: false,
@@ -87,13 +103,12 @@ export default {
   computed:{
     errorMessage(){
       return this.errObj
-    }
+		},
   },
   methods:{
 		onFileChange(e){
-			this.result = null
+			this.results = null
       this.uploadedImage = null
-
 			let files = e.target.files || e.dataTransfer.files;
 			this.createImage(files[0]);
 		},
@@ -108,7 +123,6 @@ export default {
 			this.loading = true
       this.errObj = ""
 			const img = _.cloneDeep(this.uploadedImage)
-
 			// base64の最初のdata:以下を削除
 			const startIndex = img.indexOf(",")
 			this.request.requests[0].image.content = img.slice(startIndex + 1)
@@ -116,18 +130,28 @@ export default {
 			const test = {img: img.slice(startIndex + 1)}
 			axios.post('/api/vision', test).then(response => {
 				this.loading = false
-				console.log(response.data[0])
-				this.result = response.data[0]
-				// 自動的に遷移させる
-				if(this.result.faceAnnotations.length > 0){
-					this.moveTo('/face')
-				}else if (this.result.labelAnnotations.length > 0){
-					this.moveTo('/label')
-				}else if(this.result.localizedObjectAnnotations.length > 0){
-					this.moveTo('/object')
-				}else{
-					this.errObj = new Error("エラーが発生しました")
-				}
+				const results = response.data[0]
+				const resultKeys = []
+				Object.keys(results).forEach(function (key) {
+					if(results[key] == null || results[key].length == 0 ) {
+						delete results[key]
+					}
+				})
+				Object.keys(results).forEach(function (key) {
+					resultKeys.push(key)
+				});
+				this.results = results;
+				this.resultKeys = resultKeys;
+				// // 自動的に遷移させる
+				// if(this.results.faceAnnotations.length > 0){
+				// 	this.moveTo('/face')
+				// }else if (this.results.labelAnnotations.length > 0){
+				// 	this.moveTo('/label')
+				// }else if(this.results.localizedObjectAnnotations.length > 0){
+				// 	this.moveTo('/object')
+				// }else{
+				// 	this.errObj = new Error("エラーが発生しました")
+				// }
 			}).catch(error => {
         this.errObj = error
 			})
@@ -152,10 +176,10 @@ export default {
 			// 	console.log(error);
 			// })
 		},
-		moveTo(to){
-			if (this.$route.path === to) return
-			this.$router.push(to)
-		}
+		// moveTo(to){
+		// 	if (this.$route.path === to) return
+		// 	this.$router.push(to)
+		// }
   },
 }
 </script>
