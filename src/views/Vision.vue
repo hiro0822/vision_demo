@@ -53,7 +53,6 @@ import SafeSearchAnnotation from './Safe'
 import TextAnnotations from './Text'
 import WebDetection from './Web'
 import LogoAnnotations from './Logo'
-import FullTextVue from './FullText.vue'
 
 export default {
 	name: 'Vision',
